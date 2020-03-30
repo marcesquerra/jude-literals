@@ -15,8 +15,7 @@ class JudeLiterals(val global: Global) extends Plugin {
 
   private object Component extends PluginComponent with TypingTransformers {
     val global: JudeLiterals.this.global.type = JudeLiterals.this.global
-    // val runsAfter = List("parser")
-    // Using the Scala Compiler 2.8.x the runsAfter should be written as below
+
     val runsAfter = List[String]("parser")
     val phaseName = JudeLiterals.this.name
     def newPhase(_prev: Phase) = new JudeLiteralsPhase(_prev)
@@ -24,10 +23,12 @@ class JudeLiterals(val global: Global) extends Plugin {
     class JudeLiteralsTransformer(unit: CompilationUnit)
         extends TypingTransformer(unit) {
       override def transform(tree: Tree) = tree match {
-        case p: PackageDef =>
-          val i = q"""import _root_.jude._"""
-          val r = p.copy(stats = i :: p.stats)
-          super.transform(r)
+        case Literal(Constant(l: Long)) =>
+          super.transform(q"""_root_.jude.i64($tree)""")
+        case Literal(Constant(i: Int)) =>
+          super.transform(q"""_root_.jude.i32($tree)""")
+        case Literal(Constant(s: String)) =>
+          super.transform(q"""_root_.jude.String($tree)""")
         case _ =>
           super.transform(tree)
       }
