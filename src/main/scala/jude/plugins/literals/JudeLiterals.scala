@@ -10,7 +10,7 @@ class JudeLiterals(val global: Global) extends Plugin {
   import global._
 
   val name = "literals"
-  val description = "imports the content of the jude package"
+  val description = "converts scala literal values into jude literal values"
   val components = List[PluginComponent](Component)
 
   private object Component extends PluginComponent with TypingTransformers {
