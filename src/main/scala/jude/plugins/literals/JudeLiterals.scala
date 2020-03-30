@@ -24,11 +24,11 @@ class JudeLiterals(val global: Global) extends Plugin {
         extends TypingTransformer(unit) {
       override def transform(tree: Tree) = tree match {
         case Literal(Constant(l: Long)) =>
-          super.transform(q"""_root_.jude.i64($tree)""")
+          q"""_root_.jude.i64($tree)"""
         case Literal(Constant(i: Int)) =>
-          super.transform(q"""_root_.jude.i32($tree)""")
+          q"""_root_.jude.i32($tree)"""
         case Literal(Constant(s: String)) =>
-          super.transform(q"""_root_.jude.String($tree)""")
+          q"""_root_.jude.String($tree)"""
         case _ =>
           super.transform(tree)
       }
