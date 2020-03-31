@@ -24,6 +24,12 @@ class JudeLiterals(val global: Global) extends Plugin {
     class JudeLiteralsTransformer(unit: CompilationUnit)
         extends TypingTransformer(unit) {
       override def transform(tree: Tree) = tree match {
+        case Literal(Constant(null)) =>
+          global.reporter.error(
+            tree.pos,
+            "literal 'null' values are not supported. Instead use 'unsafe.nullValue'"
+          )
+          tree
         case Literal(Constant(_: Boolean)) =>
           q"""_root_.jude.Boolean($tree)"""
         case Literal(Constant(_: Float)) =>
