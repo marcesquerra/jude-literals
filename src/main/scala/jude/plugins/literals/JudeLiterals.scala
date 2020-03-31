@@ -15,7 +15,8 @@ class JudeLiterals(val global: Global) extends Plugin {
 
   private object Component extends PluginComponent with TypingTransformers {
     val global: JudeLiterals.this.global.type = JudeLiterals.this.global
-
+    // val runsAfter = List("parser")
+    // Using the Scala Compiler 2.8.x the runsAfter should be written as below
     val runsAfter = List[String]("parser")
     val phaseName = JudeLiterals.this.name
     def newPhase(_prev: Phase) = new JudeLiteralsPhase(_prev)
@@ -23,12 +24,22 @@ class JudeLiterals(val global: Global) extends Plugin {
     class JudeLiteralsTransformer(unit: CompilationUnit)
         extends TypingTransformer(unit) {
       override def transform(tree: Tree) = tree match {
-        case Literal(Constant(l: Long)) =>
+        case Literal(Constant(_: Boolean)) =>
+          q"""_root_.jude.Boolean($tree)"""
+        case Literal(Constant(_: Float)) =>
+          q"""_root_.jude.f32($tree)"""
+        case Literal(Constant(_: Double)) =>
+          q"""_root_.jude.f64($tree)"""
+        case Literal(Constant(_: Long)) =>
           q"""_root_.jude.i64($tree)"""
-        case Literal(Constant(i: Int)) =>
+        case Literal(Constant(_: Int)) =>
           q"""_root_.jude.i32($tree)"""
-        case Literal(Constant(s: String)) =>
+        case Literal(Constant(_: String)) =>
           q"""_root_.jude.String($tree)"""
+
+        case If(condition, thenPart, elsePart) =>
+          val newCondition = q"""(${transform(condition)}).toScalaPrimitive"""
+          If(newCondition, transform(thenPart), transform(elsePart))
         case _ =>
           super.transform(tree)
       }

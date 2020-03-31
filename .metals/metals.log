@@ -1,5 +1,0 @@
-INFO  started: Metals version 0.8.0 in workspace '/Users/marcesquerra/development/jude/jude-literals-plugin'
-INFO  time: initialize in 0.37s
-WARN  no build target for: /Users/marcesquerra/development/jude/jude-literals-plugin/src/main/scala/jude/plugins/literals/JudeLiterals.scala
-WARN  no build target for: /Users/marcesquerra/development/jude/jude-literals-plugin/src/main/scala/jude/plugins/literals/JudeLiterals.scala
-WARN  no build target for: /Users/marcesquerra/development/jude/jude-literals-plugin/src/main/scala/jude/plugins/literals/JudeLiterals.scala
