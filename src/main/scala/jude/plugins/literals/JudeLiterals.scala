@@ -30,6 +30,8 @@ class JudeLiterals(val global: Global) extends Plugin {
             "literal 'null' values are not supported. Instead use 'unsafe.nullValue'"
           )
           tree
+        case Ident(TermName("_root_$u002Ejude$u002Eunsafe$u002EnullValue")) =>
+          Literal(Constant(null))
         case Literal(Constant(_: Boolean)) =>
           q"""_root_.jude.Boolean($tree)"""
         case Literal(Constant(_: Float)) =>
@@ -47,6 +49,14 @@ class JudeLiterals(val global: Global) extends Plugin {
           val newCondition = q"""(${transform(condition)}).toScalaPrimitive"""
           If(newCondition, transform(thenPart), transform(elsePart))
         case _ =>
+          // I'll keep this in here. It's good to run experiments
+          // println(s"""|
+          //   |=================
+          //   |$tree
+          //   |-----------------
+          //   |${showRaw(tree)}
+          //   |=================
+          //   |""".stripMargin)
           super.transform(tree)
       }
     }
