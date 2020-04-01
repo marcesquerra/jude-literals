@@ -36,11 +36,11 @@ class JudeLiterals(val global: Global) extends Plugin {
             case Literal(Constant(null)) =>
               global.reporter.error(
                 tree.pos,
-                "literal 'null' values are not supported. Instead use 'unsafe.nullValue'"
+                "literal 'null' values are not supported. Use 'unsafe.NULL_VALUE' instead"
               )
               tree
             case Ident(
-                TermName("_root_$u002Ejude$u002Eunsafe$u002EnullValue")
+                TermName("_root_$u002Ejude$u002Eunsafe$u002ENULL_VALUE")
                 ) =>
               val id = genId
               assignments +=
