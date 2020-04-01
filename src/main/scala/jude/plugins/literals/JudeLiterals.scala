@@ -23,6 +23,117 @@ class JudeLiterals(val global: Global) extends Plugin {
 
     class JudeLiteralsTransformer(unit: CompilationUnit)
         extends TypingTransformer(unit) {
+
+      import java.util.concurrent.atomic.AtomicInteger
+      private val offset = new AtomicInteger()
+
+      def extractCaseCondition(conditionTree: Tree): (List[Tree], Tree) = {
+        def genId = TermName("CONST_TMP_" + offset.incrementAndGet + "$")
+        var assignments = List.newBuilder[Tree]
+        val transformer = new TypingTransformer(unit) {
+
+          override def transform(tree: Tree) = tree match {
+            case Literal(Constant(null)) =>
+              global.reporter.error(
+                tree.pos,
+                "literal 'null' values are not supported. Instead use 'unsafe.nullValue'"
+              )
+              tree
+            case Ident(
+                TermName("_root_$u002Ejude$u002Eunsafe$u002EnullValue")
+                ) =>
+              val id = genId
+              assignments +=
+                ValDef(
+                  Modifiers(),
+                  id,
+                  TypeTree(),
+                  q"${Literal(Constant(null))}"
+                )
+              Ident(id)
+            case Literal(Constant(_: Boolean)) =>
+              val id = genId
+              assignments +=
+                ValDef(
+                  Modifiers(),
+                  id,
+                  TypeTree(),
+                  q"""_root_.jude.Boolean($tree)"""
+                )
+              Ident(id)
+            case Literal(Constant(_: Float)) =>
+              val id = genId
+              assignments +=
+                ValDef(
+                  Modifiers(),
+                  id,
+                  TypeTree(),
+                  q"""_root_.jude.f32($tree)"""
+                )
+              Ident(id)
+            case Literal(Constant(_: Double)) =>
+              val id = genId
+              assignments +=
+                ValDef(
+                  Modifiers(),
+                  id,
+                  TypeTree(),
+                  q"""_root_.jude.f64($tree)"""
+                )
+              Ident(id)
+            case Literal(Constant(_: Long)) =>
+              val id = genId
+              assignments +=
+                ValDef(
+                  Modifiers(),
+                  id,
+                  TypeTree(),
+                  q"""_root_.jude.i64($tree)"""
+                )
+              Ident(id)
+            case Literal(Constant(_: Int)) =>
+              val id = genId
+              assignments +=
+                ValDef(
+                  Modifiers(),
+                  id,
+                  TypeTree(),
+                  q"""_root_.jude.i32($tree)"""
+                )
+              Ident(id)
+            case Literal(Constant(_: String)) =>
+              val id = genId
+              assignments +=
+                ValDef(
+                  Modifiers(),
+                  id,
+                  TypeTree(),
+                  q"""_root_.jude.String($tree)"""
+                )
+              Ident(id)
+
+            case _ =>
+              super.transform(tree)
+          }
+        }
+
+        val transformedTree = transformer.transform(conditionTree)
+
+        (assignments.result, transformedTree)
+      }
+      def extractCase(kase: CaseDef): (List[Tree], CaseDef) = {
+        val CaseDef(conditionTree, guard, target) = kase
+        val (assignments, newCondition) = extractCaseCondition(conditionTree)
+        (
+          assignments,
+          CaseDef(newCondition, transform(guard), transform(target))
+        )
+      }
+      def extractCases(cases: List[CaseDef]): (List[Tree], List[CaseDef]) = {
+        val individualCases = cases.map(extractCase)
+        (individualCases.flatMap(_._1), individualCases.map(_._2))
+      }
+
       override def transform(tree: Tree) = tree match {
         case Literal(Constant(null)) =>
           global.reporter.error(
@@ -45,6 +156,9 @@ class JudeLiterals(val global: Global) extends Plugin {
         case Literal(Constant(_: String)) =>
           q"""_root_.jude.String($tree)"""
 
+        case Match(matched, cases) =>
+          val (assignments, newCases) = extractCases(cases)
+          Block((assignments ++ List(Match(transform(matched), newCases))): _*)
         case If(condition, thenPart, elsePart) =>
           val newCondition = q"""(${transform(condition)}).toScalaPrimitive"""
           If(newCondition, transform(thenPart), transform(elsePart))
