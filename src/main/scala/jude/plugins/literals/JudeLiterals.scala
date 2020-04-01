@@ -173,6 +173,7 @@ class JudeLiterals(val global: Global) extends Plugin {
           //   |""".stripMargin)
           super.transform(tree)
       }
+      override def transformModifiers(m: Modifiers): Modifiers = m
     }
 
     def newTransformer(unit: CompilationUnit) =
