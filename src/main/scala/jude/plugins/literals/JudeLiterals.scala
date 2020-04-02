@@ -162,8 +162,9 @@ class JudeLiterals(val global: Global) extends Plugin {
         case If(condition, thenPart, elsePart) =>
           val newCondition = q"""(${transform(condition)}).toScalaPrimitive"""
           If(newCondition, transform(thenPart), transform(elsePart))
-        case Apply(Ident(TermName("StringContext")), _) =>
-          tree
+        // This would keep the StringContext input strings as they are
+        // case Apply(Ident(TermName("StringContext")), _) =>
+        //   tree
         case _ =>
           // I'll keep this in here. It's good to run experiments
           // println(s"""|
