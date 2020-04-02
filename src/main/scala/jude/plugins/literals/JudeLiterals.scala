@@ -101,6 +101,16 @@ class JudeLiterals(val global: Global) extends Plugin {
                   q"""_root_.jude.i32($tree)"""
                 )
               Ident(id)
+            case Literal(Constant(_: Char)) =>
+              val id = genId
+              assignments +=
+                ValDef(
+                  Modifiers(),
+                  id,
+                  TypeTree(),
+                  q"""_root_.jude.Rune(${tree}.toInt)"""
+                )
+              Ident(id)
             case Literal(Constant(_: String)) =>
               val id = genId
               assignments +=
@@ -153,6 +163,8 @@ class JudeLiterals(val global: Global) extends Plugin {
           q"""_root_.jude.i64($tree)"""
         case Literal(Constant(_: Int)) =>
           q"""_root_.jude.i32($tree)"""
+        case Literal(Constant(_: Char)) =>
+          q"""_root_.jude.Rune(${tree}.toInt)"""
         case Literal(Constant(_: String)) =>
           q"""_root_.jude.String($tree)"""
 
