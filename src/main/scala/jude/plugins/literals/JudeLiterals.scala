@@ -50,7 +50,7 @@ class JudeLiterals(val global: Global) extends Plugin {
                   TypeTree(),
                   q"${Literal(Constant(null))}"
                 )
-              Ident(id)
+              Ident(id).setPos(tree.pos)
             case Literal(Constant(_: Boolean)) =>
               val id = genId
               assignments +=
@@ -60,7 +60,7 @@ class JudeLiterals(val global: Global) extends Plugin {
                   TypeTree(),
                   q"""_root_.jude.Boolean($tree)"""
                 )
-              Ident(id)
+              Ident(id).setPos(tree.pos)
             case Literal(Constant(_: Float)) =>
               val id = genId
               assignments +=
@@ -70,7 +70,7 @@ class JudeLiterals(val global: Global) extends Plugin {
                   TypeTree(),
                   q"""_root_.jude.f32($tree)"""
                 )
-              Ident(id)
+              Ident(id).setPos(tree.pos)
             case Literal(Constant(_: Double)) =>
               val id = genId
               assignments +=
@@ -80,7 +80,7 @@ class JudeLiterals(val global: Global) extends Plugin {
                   TypeTree(),
                   q"""_root_.jude.f64($tree)"""
                 )
-              Ident(id)
+              Ident(id).setPos(tree.pos)
             case Literal(Constant(_: Long)) =>
               val id = genId
               assignments +=
@@ -90,7 +90,7 @@ class JudeLiterals(val global: Global) extends Plugin {
                   TypeTree(),
                   q"""_root_.jude.i64($tree)"""
                 )
-              Ident(id)
+              Ident(id).setPos(tree.pos)
             case Literal(Constant(_: Int)) =>
               val id = genId
               assignments +=
@@ -100,7 +100,7 @@ class JudeLiterals(val global: Global) extends Plugin {
                   TypeTree(),
                   q"""_root_.jude.i32($tree)"""
                 )
-              Ident(id)
+              Ident(id).setPos(tree.pos)
             case Literal(Constant(_: Char)) =>
               val id = genId
               assignments +=
@@ -110,7 +110,7 @@ class JudeLiterals(val global: Global) extends Plugin {
                   TypeTree(),
                   q"""_root_.jude.Rune(${tree}.toInt)"""
                 )
-              Ident(id)
+              Ident(id).setPos(tree.pos)
             case Literal(Constant(_: String)) =>
               val id = genId
               assignments +=
@@ -120,7 +120,7 @@ class JudeLiterals(val global: Global) extends Plugin {
                   TypeTree(),
                   q"""_root_.jude.String($tree)"""
                 )
-              Ident(id)
+              Ident(id).setPos(tree.pos)
 
             case _ =>
               super.transform(tree)
@@ -172,7 +172,7 @@ class JudeLiterals(val global: Global) extends Plugin {
           val (assignments, newCases) = extractCases(cases)
           Block((assignments ++ List(Match(transform(matched), newCases))): _*)
         case If(condition, thenPart, elsePart) =>
-          val newCondition = q"""(${transform(condition)}).toScalaPrimitive"""
+          val newCondition = q"""(${transform(condition)}).toScalaEntity"""
           If(newCondition, transform(thenPart), transform(elsePart))
         // This would keep the StringContext input strings as they are
         // case Apply(Ident(TermName("StringContext")), _) =>
